@@ -17,7 +17,7 @@ public class Connection implements Closeable {
                 (socket.getInputStream()));
     }
 
-    public void send(String ... message) throws IOException {
+    public void send(String... message) throws IOException {
         for (String s : message) {
             out.write(s.getBytes());
         }
@@ -31,6 +31,18 @@ public class Connection implements Closeable {
     public void send(Path path) throws IOException {
         Files.copy(path, out);
         out.flush();
+    }
+
+    public BufferedReader getIn() {
+        return in;
+    }
+
+    public BufferedOutputStream getOut() {
+        return out;
+    }
+
+    public Socket getSocket() {
+        return socket;
     }
 
     @Override
