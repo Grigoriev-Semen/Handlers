@@ -25,43 +25,13 @@ public class Main {
         final var server = new Server(port, countConnection);
 
         for (String validPath : ClientHandler.validPaths) {
-
             server.addHandler("GET", validPath, (request, connection) -> {
-                try {
-                    final var filePath = Path.of(".", "public", request.getPath());
-                    final var mimeType = Files.probeContentType(filePath);
-
-                    // special case for classic
-                    final var template = Files.readString(filePath);
-                    if (template.contains("{time}")) {
-                        final var content = template.replace("{time}", LocalDateTime.now().toString());
-                        connection.send(
-                                "HTTP/1.1 200 OK\r\n" +
-                                        "Content-Type: " + mimeType + "\r\n" +
-                                        "Content-Length: " + content.getBytes().length + "\r\n" +
-                                        "Connection: close\r\n" +
-                                        "\r\n"
-                                , content);
-                    }
-
-
-                    final var length = Files.size(filePath);
-                    connection.send(
-                            "HTTP/1.1 200 OK\r\n" +
-                                    "Content-Type: " + mimeType + "\r\n" +
-                                    "Content-Length: " + length + "\r\n" +
-                                    "Connection: close\r\n" +
-                                    "\r\n"
-                    );
-                    connection.send(filePath);
-                    connection.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                ClientHandler.response(request, connection);
             });
         }
 
-        server.addHandler("POST", "/messages", (request, connection) -> {
+        server.addHandler("POST", "/default-get.html", (request, connection) -> {
+            ClientHandler.response(request, connection);
         });
 
         server.start();

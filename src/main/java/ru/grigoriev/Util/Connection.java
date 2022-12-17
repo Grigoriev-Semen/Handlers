@@ -7,14 +7,14 @@ import java.nio.file.Path;
 
 public class Connection implements Closeable {
     private final Socket socket;
-    private final BufferedReader in;
+    private final BufferedInputStream in;
     private final BufferedOutputStream out;
 
     public Connection(Socket socket) throws Exception {
         this.socket = socket;
         this.out = new BufferedOutputStream(socket.getOutputStream());
-        this.in = new BufferedReader(new InputStreamReader
-                (socket.getInputStream()));
+        this.in = new BufferedInputStream
+                (socket.getInputStream());
     }
 
     public void send(String... message) throws IOException {
@@ -24,16 +24,16 @@ public class Connection implements Closeable {
         out.flush();
     }
 
-    public String receive() throws Exception {
-        return in.readLine();
-    }
-
     public void send(Path path) throws IOException {
         Files.copy(path, out);
         out.flush();
     }
 
-    public BufferedReader getIn() {
+    public int read(byte[] buffer) throws IOException {
+        return in.read(buffer);
+    }
+
+    public BufferedInputStream getIn() {
         return in;
     }
 
