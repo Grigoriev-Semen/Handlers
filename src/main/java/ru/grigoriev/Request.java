@@ -2,13 +2,7 @@ package ru.grigoriev;
 
 import org.apache.hc.core5.http.NameValuePair;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Request {
     private final String method;
@@ -24,6 +18,10 @@ public class Request {
     }
 
     public String getPath() {
+        if (path.contains("?")) {
+            int index = path.indexOf("?");
+            return path.substring(0, index);
+        }
         return path;
     }
 
@@ -51,16 +49,17 @@ public class Request {
         return queryParams;
     }
 
-    public String getQueryParam(String param) {
-        return asStream(queryParams)
-                .filter(par -> par.getName().equals(param))
-                .map(NameValuePair::getValue)
-                .collect(Collectors.joining(": "));
-    }
-
-    public static <T> Stream<T> asStream(final Collection<T> collection) {
-        return Optional.ofNullable(collection).stream()
-                .flatMap(Collection::stream);
+    public String getQueryParam(String... param) {
+        if (queryParams != null || !queryParams.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            for (String str : param) {
+                queryParams.stream()
+                        .filter(par -> par.getName().equals(str))
+                        .forEach(value -> sb.append(str).append("=").append(value.getValue()).append("\n"));
+            }
+            return sb.toString();
+        }
+        return "No result";
     }
 
     @Override
@@ -73,7 +72,6 @@ public class Request {
                 "method = " + method + "\n" +
                 "path = " + path + "\n" +
                 "headers:" + "\n" + header +
-                "body: " + body + "\n" +
-                "queryParam: " + "\n" + queryParams;
+                "body: " + "\n" + body + "\n";
     }
 }

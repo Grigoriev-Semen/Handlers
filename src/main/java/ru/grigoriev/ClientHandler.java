@@ -40,6 +40,11 @@ public class ClientHandler implements Runnable {
                 }
 
                 handler.handle(request, connection);
+
+                System.out.println(request);
+
+                System.out.println("\n-------Print param----------");
+                System.out.println(request.getQueryParam("value", "name"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -114,9 +119,6 @@ public class ClientHandler implements Runnable {
             final URI uri = new URI(path);
             request.setQueryParams(URLEncodedUtils.parse(uri, StandardCharsets.UTF_8));
         }
-        System.out.println(request);
-        System.out.println("\n\n-------Print param----------");
-        System.out.println(request.getQueryParam("value"));
 
         return request;
     }
