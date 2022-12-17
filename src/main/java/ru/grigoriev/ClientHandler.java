@@ -115,7 +115,7 @@ public class ClientHandler implements Runnable {
             request.setQueryParams(URLEncodedUtils.parse(uri, StandardCharsets.UTF_8));
         }
         System.out.println(request);
-        System.out.println("---------------------------------------");
+        System.out.println("\n\n-------Print param----------");
         System.out.println(request.getQueryParam("value"));
 
         return request;
