@@ -48,7 +48,7 @@ public class ClientHandler implements Runnable {
                 System.out.println(request.getQueryParam("value", "name"));
 
                 System.out.println("\n-------Print postParam----------");
-                System.out.println(request.getPostParam("value","title"));
+                System.out.println(request.getPostParam("value", "title"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -124,12 +124,12 @@ public class ClientHandler implements Runnable {
             request.setQueryParams(URLEncodedUtils.parse(uri, StandardCharsets.UTF_8));
             // делаем проверку на enctype="application/x-www-form-urlencoded"
             // если "да", то собираем параметры
-             if(request.getHeaders().get("Content-Type:").equals("application/x-www-form-urlencoded")){
-                 for (String str : request.getBody().split("&")) {
-                     request.addPostParam(str, new Request.PostParam
-                             (StringUtils.substringBefore(str, "="), StringUtils.substringAfter(str, "=")));
-                 }
-             }
+            if (request.getHeaders().get("Content-Type:").equals("application/x-www-form-urlencoded")) {
+                for (String str : request.getBody().split("&")) {
+                    request.addPostParam(new Request.PostParam
+                            (StringUtils.substringBefore(str, "="), StringUtils.substringAfter(str, "=")));
+                }
+            }
         }
 
         return request;

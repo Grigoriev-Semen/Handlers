@@ -3,7 +3,10 @@ package ru.grigoriev;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.NameValuePair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Request {
     private final String method;
@@ -11,15 +14,16 @@ public class Request {
     private final Map<String, String> headers;
     private String body;
     private List<NameValuePair> queryParams;
-    private final Map<String,List<PostParam>>  postParams;
+    private final List<PostParam> postParams;
 
     public Request(String method, String path, List<String> listHeaders) {
         this.method = method;
         this.path = path;
         this.headers = new TreeMap<>();
-        this.postParams = new HashMap<>();
+        this.postParams = new ArrayList<>();
+        this.queryParams = new ArrayList<>();
         listHeaders.forEach(v -> headers.put
-                (StringUtils.substringBefore(v, " "), StringUtils.substringAfterLast(v," ")));
+                (StringUtils.substringBefore(v, " "), StringUtils.substringAfterLast(v, " ")));
     }
 
     public String getPath() {
@@ -55,39 +59,37 @@ public class Request {
     }
 
     public String getQueryParam(String... param) {
-        if (queryParams != null || !queryParams.isEmpty()) {
+        if (!queryParams.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (String str : param) {
-                queryParams.forEach(v-> sb.append(v).append("\n"));
+                queryParams.stream()
+                        .filter(par -> par.getName().equals(str))
+                        .forEach(value -> sb.append(str).append("=").append(value.getValue()).append("\n"));
             }
-            return sb.toString();
+            return sb.toString().isEmpty() ? "No result" : sb.toString();
         }
         return "No result";
     }
 
-    public Map<String,List<PostParam>> getPostParam() {
+    public List<PostParam> getPostParams() {
         return postParams;
     }
 
     public String getPostParam(String... param) {
-        if (postParams != null || !postParams.isEmpty()) {
+        if (!postParams.isEmpty()) {
             StringBuilder sb = new StringBuilder();
             for (String str : param) {
-                for (PostParam postParam : postParams.get(str)) {
-                    sb.append(postParam);
-                }
+                postParams.stream()
+                        .filter(par -> par.getName().equals(str))
+                        .forEach(value -> sb.append(str).append("=").append(value.getValue()).append("\n"));
             }
-            return sb.toString();
+            return sb.toString().isEmpty() ? "No result" : sb.toString();
         }
         return "No result";
     }
 
-    public void addPostParam(String key,PostParam postParam){
-        postParams.computeIfPresent(key, (k, v) -> {
-            v.add(postParam);
-            return v;
-        });
-        postParams.putIfAbsent(key, List.of(postParam));
+    public void addPostParam(PostParam postParam) {
+        postParams.add(postParam);
     }
 
     @Override
@@ -103,9 +105,9 @@ public class Request {
                 "body: " + "\n" + body + "\n";
     }
 
-    static  class PostParam {
-        private String name;
-        private String value;
+    static class PostParam {
+        private final String name;
+        private final String value;
 
         public PostParam(String name, String value) {
             this.name = name;
@@ -116,21 +118,13 @@ public class Request {
             return name;
         }
 
-        public void setName(String name) {
-            this.name = name;
-        }
-
         public String getValue() {
             return value;
         }
 
-        public void setValue(String value) {
-            this.value = value;
-        }
-
         @Override
         public String toString() {
-            return  name + "=" + value + "\n";
+            return name + "=" + value + "\n";
         }
     }
 }
