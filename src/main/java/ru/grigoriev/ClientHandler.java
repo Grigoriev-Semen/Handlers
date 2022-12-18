@@ -1,5 +1,6 @@
 package ru.grigoriev;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URLEncodedUtils;
 import ru.grigoriev.Util.Connection;
 
@@ -45,6 +46,9 @@ public class ClientHandler implements Runnable {
 
                 System.out.println("\n-------Print param----------");
                 System.out.println(request.getQueryParam("value", "name"));
+
+                System.out.println("\n-------Print postParam----------");
+                System.out.println(request.getPostParam("value","title"));
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -118,6 +122,14 @@ public class ClientHandler implements Runnable {
             }
             final URI uri = new URI(path);
             request.setQueryParams(URLEncodedUtils.parse(uri, StandardCharsets.UTF_8));
+            // делаем проверку на enctype="application/x-www-form-urlencoded"
+            // если "да", то собираем параметры
+             if(request.getHeaders().get("Content-Type:").equals("application/x-www-form-urlencoded")){
+                 for (String str : request.getBody().split("&")) {
+                     request.addPostParam(str, new Request.PostParam
+                             (StringUtils.substringBefore(str, "="), StringUtils.substringAfter(str, "=")));
+                 }
+             }
         }
 
         return request;
